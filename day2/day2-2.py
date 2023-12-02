@@ -10,11 +10,7 @@ def init_color_dict(red=0, green=0, blue=0):
 
 
 def parse_cube_set(cube_set):
-    color_values = {
-        "red": 0,
-        "green": 0,
-        "blue": 0
-    }
+    color_values = init_color_dict()
     for color_part in cube_set.split(","):
         _, count, color = color_part.split(" ")
         color_values[color] = int(count)
