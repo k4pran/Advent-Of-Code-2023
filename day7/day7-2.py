@@ -1,8 +1,7 @@
 from collections import Counter
 from functools import cmp_to_key
 
-card_values = {"j": 0,
-               "2": 2,
+card_values = {"2": 2,
                "3": 3,
                "4": 4,
                "5": 5,
@@ -11,28 +10,64 @@ card_values = {"j": 0,
                "8": 8,
                "9": 9,
                "T": 10,
-               "J": 11,
+               "J": 0,
                "Q": 12,
                "K": 13,
                "A": 14}
 
 
+def handle_jacks(hand, strength):
+    if "J" not in hand:
+        return strength
+    nb_jacks = hand.count("J")
+    # 5 of a kind - strength doesn't change
+    if strength == 6:
+        return strength
+    # 4 of a kind - always gets upgraded to 5 of a kind
+    if strength == 5:
+        return 6
+    # full house - either 2 or 3 jacks - can always be upgraded to 5 of a kind
+    if strength == 4:
+        return 6
+    # three of a kind - 2 jacks
+    if strength == 3:
+        if nb_jacks == 1 or nb_jacks == 3:
+            return 5
+        if nb_jacks == 2:
+            return 6
+    # two pair
+    if strength == 2:
+        if nb_jacks == 2:
+            return 5
+        if nb_jacks == 1:
+            return 4
+    # pair
+    if strength == 1:
+        if nb_jacks == 3:
+            return 6
+        if nb_jacks == 2 or nb_jacks == 1:
+            return 3
+    if strength == 0:
+        if nb_jacks == 1:
+            # pair
+            return 1
+
 def get_hand_strength(hand):
     tally = Counter(hand)
     most_common = tally.most_common()[0][1]
     if most_common == 5:
-        return 6
+        return handle_jacks(hand, 6)
     if most_common == 4:
-        return 5
+        return handle_jacks(hand, 5)
     if 2 in tally.values() and 3 in tally.values():
-        return 4
+        return handle_jacks(hand, 4)
     if most_common == 3:
-        return 3
+        return handle_jacks(hand, 3)
     if most_common == 2:
         if Counter(tally.values()).most_common()[0][1] == 2:
-            return 2
-        return 1
-    return 0
+            return handle_jacks(hand, 2)
+        return handle_jacks(hand, 1)
+    return handle_jacks(hand, 0)
 
 
 def sort_ranks(hand_1, hand_2):
@@ -59,7 +94,7 @@ def sort_ranks(hand_1, hand_2):
 def get_winnings(hands):
     winnings = 0
     for i, hand in enumerate(hands):
-        print(f"{int(hand[1])} * {(i + 1)}")
+        # print(f"{int(hand[1])} * {(i + 1)}")
         winnings += int(hand[1]) * (i + 1)
     return winnings
 
@@ -74,6 +109,8 @@ def parse(lines):
         card_tuples.append((hand, bid, rank))
 
     sorted_hands = sorted(card_tuples, key=cmp_to_key(sort_ranks))
+    for hand in reversed(sorted_hands):
+        print(hand[0])
 
     return get_winnings(sorted_hands)
 
