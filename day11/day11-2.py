@@ -18,26 +18,24 @@ def expand_universe(lines, expansion=1000000 - 1):
     empty_galaxy_cols = sorted([i for i in empty_galaxy_cols])
     empty_galaxy_rows = sorted([i for i in empty_galaxy_rows])
 
-    inc = 0
     galaxies = sorted(galaxies, key=lambda x: x[1])
     for i, empty_col in enumerate(empty_galaxy_cols):
         for j, galaxy in enumerate(galaxies):
             if galaxy[1] > empty_col:
                 for galaxy_to_update in galaxies[j:]:
-                    galaxy_to_update[1] += inc + expansion
+                    galaxy_to_update[1] += expansion
                 for k, empty_galaxy_col in enumerate(empty_galaxy_cols[i + 1:]):
-                    empty_galaxy_cols[k + i + 1] += inc + expansion
+                    empty_galaxy_cols[k + i + 1] += expansion
                 break
 
-    inc = 0
     galaxies = sorted(galaxies, key=lambda x: x[0])
     for i, empty_rows in enumerate(empty_galaxy_rows):
         for j, galaxy in enumerate(galaxies):
             if galaxy[0] > empty_rows:
                 for galaxy_to_update in galaxies[j:]:
-                    galaxy_to_update[0] += inc + expansion
+                    galaxy_to_update[0] += expansion
                 for k, empty_galaxy_row in enumerate(empty_galaxy_rows[i + 1:]):
-                    empty_galaxy_rows[k + i + 1] += inc + expansion
+                    empty_galaxy_rows[k + i + 1] += expansion
                 break
 
     return galaxies
