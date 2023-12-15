@@ -60,4 +60,4 @@ with open("day15.txt", 'r') as f:
 
     total = parse(text)
 
-    print(f"Day 15-1: {total}")
+    print(f"Day 15-2: {total}")
