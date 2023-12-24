@@ -1,4 +1,3 @@
-import sys
 from collections import deque
 
 slopes = {
@@ -8,7 +7,6 @@ slopes = {
     "<": (0, -1)
 }
 
-sys.setrecursionlimit(10000)
 
 def as_grid(lines):
     return [[col for col in row] for row in lines]
@@ -63,22 +61,6 @@ def find_junctions_and_deadends(grid):
 
 longest_path = [[]]
 
-def dfs(grid, start, end, visited, path):
-    visited.add(start)
-    path.append(start)
-
-    if start == end and len(path) > len(longest_path[0]):
-        longest_path[0] = list(path)
-    else:
-        neighbours = get_neighbours(grid, start)
-        for neighbour in neighbours:
-            if neighbour not in visited:
-                dfs(grid, neighbour, end, visited, path)
-
-    path.pop()
-    visited.remove(start)
-
-
 def find_next_junction(grid, start, previous_pos=None):
     is_junction = False
     pos = start
@@ -98,15 +80,21 @@ def find_longest(grid, start):
     q = deque()
     q.append((start, None, 0, set()))  # Each path has its own set of visited junctions
     longest_dist = 0
-
+    mem = dict()
+    states = set()
     while q:
-        start, previous_pos, current_dist, junctions_visited = q.popleft()
+        start, previous_pos, current_dist, junctions_visited = q.pop()
+        if start in mem:
+            previous_pos, junction, added_dist = mem[start]
+        else:
+            _, previous_pos, junction, added_dist = find_next_junction(grid, start, previous_pos=previous_pos)
+            mem[start] = (previous_pos, junction, added_dist)
 
-        _, previous_pos, junction, added_dist = find_next_junction(grid, start, previous_pos=previous_pos)
         if junction[0] == len(grid) - 1:
             updated_dist = current_dist + added_dist
             if updated_dist > longest_dist:
                 longest_dist = updated_dist
+                print(longest_dist)
             continue
 
         neighbours = get_neighbours(grid, junction, previous_loc=previous_pos)
@@ -118,21 +106,20 @@ def find_longest(grid, start):
                     longest_dist = updated_dist
 
             elif junction not in junctions_visited:
-                updated_junctions_visited = junctions_visited.copy()
-                updated_junctions_visited.add(junction)
-                q.append((neighbour, junction, current_dist + added_dist + 1, updated_junctions_visited))
+                state = neighbour, junction
+                if state not in states:
+                    updated_junctions_visited = junctions_visited.copy()
+                    updated_junctions_visited.add(junction)
+                    q.append((neighbour, junction, current_dist + added_dist + 1, updated_junctions_visited))
+                else:
+                    states.add(state)
 
     return longest_dist
 
 def solve(lines):
     global longest_path
     grid = as_grid(lines)
-    # start, end, dist = find_next_junction(grid, find_start(grid), dist)
     return find_longest(grid, find_start(grid))
-
-    # print(longest_path)
-    # print(junctions)
-    # return len(longest_path[0]) - 1
 
 
 with open("day23.txt", 'r') as f:
@@ -141,3 +128,6 @@ with open("day23.txt", 'r') as f:
     total = solve(lines)
 
     print(f"Day 23-2: {total}")
+
+    #6358 too low
+    #6382 too low
