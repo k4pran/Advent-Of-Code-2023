@@ -1,3 +1,5 @@
+from sympy import symbols, solve
+
 def get_hailstones(lines):
     hailstones = []
     for line in lines:
@@ -7,29 +9,29 @@ def get_hailstones(lines):
         hailstones.append((p, v))
     return hailstones
 
-def is_in_bounds(pos, lower_bound, upper_bound):
-    x, y = pos
-    return lower_bound <= x <= upper_bound and lower_bound <= y <= upper_bound
-
-
-def find_intersections(hailstones, lower_bound=200000000000000, upper_bound=400000000000000):
-    total = 0
-    for i in range(len(hailstones)):
-        for j in range(i + 1, len(hailstones)):
-            intersection = get_intersection(hailstones[i], hailstones[j])
-            if intersection and is_in_bounds(intersection, lower_bound, upper_bound):
-                print(intersection)
-                total += 1
-    return total
-
-def solve(lines):
+def find_intersection(lines):
     hailstones = get_hailstones(lines)
-    return find_intersections(hailstones)
 
+    px, py, pz, vx, vy, vz = symbols("px, py, pz, vx, vy, vz")
+    equations = []
+    for i, (pos, vel) in enumerate(hailstones):
+
+        equations.append((px - pos[0]) * (vel[1] - vy) - (py - pos[1]) * (vel[0] - vx))
+        equations.append((py - pos[1]) * (vel[2] - vz) - (pz - pos[2]) * (vel[1] - vy))
+
+        if i == 0:
+            continue
+
+        solution = [soln for soln in solve(equations) if all(x % 1 == 0 for x in soln.values())]
+
+        if solution:
+            return sum([v for v in solution[0].values()][:len(pos)])
+
+    return -1
 
 with open("day24.txt", 'r') as f:
     lines = f.read().splitlines()
 
-    total = solve(lines)
+    total = find_intersection(lines)
 
     print(f"Day 24-2: {total}")
